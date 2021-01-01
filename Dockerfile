@@ -1,19 +1,28 @@
-FROM debian:jessie
+FROM debian:stretch
 
 RUN apt-get update && apt-get install -y \
 		apache2 \
 		curl \
-		libapache2-mod-php5 \
-		php5-curl \
-		php5-gd \
-		php5-mysql \
+		libapache2-mod-php7.0 \
+		php7.0-curl \
+		php7.0-gd \
+		php7.0-mysql \
+		php7.0-xml \
 		rsync \
 		wget
+# 设置时区
+RUN ln -sf /usr/share/zoneinfo/Asia/ShangHai /etc/localtime 
+# 经测试，不加这一行有时会不生效。或系统重启后也会恢复成UTC时间
+RUN echo "Asia/Shanghai" > /etc/timezone
+RUN dpkg-reconfigure -f noninteractive tzdata
+
 RUN a2enmod rewrite
 
 RUN rm -rf /var/www/html && mkdir /var/www/html
 WORKDIR /var/www/html
 
+# set non interactive timazone
+ENV DEBIAN_FRONTEND=noninteractive
 # copy a few things from apache's init script that it requires to be setup
 ENV APACHE_CONFDIR /etc/apache2
 ENV APACHE_ENVVARS $APACHE_CONFDIR/envvars
